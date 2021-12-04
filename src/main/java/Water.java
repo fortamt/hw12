@@ -19,7 +19,7 @@ public class Water {
         while (true) {
             try {
                 semaphoreH.acquire();
-                System.out.println("H");
+                System.out.print("H");
                 counter++;
                 if(counter == 2){
                     cyclicBarrier.await();
@@ -38,7 +38,7 @@ public class Water {
         while(true) {
             try {
                 semaphoreO.acquire();
-                System.out.println("O");
+                System.out.print("O");
                 cyclicBarrier.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
