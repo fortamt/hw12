@@ -1,59 +1,51 @@
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Semaphore;
 
 public class Water {
+    static Semaphore semaphoreH = new Semaphore(2);
+    static Semaphore semaphoreO = new Semaphore(1);
+    static CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
 
     public static void main(String[] args) {
-        Thread H1 = new Thread(Atoms::releaseHydrogen);
-        H1.start();
-        Thread H2 = new Thread(Atoms::releaseHydrogen);
-        H2.start();
-        Thread O1 = new Thread(Atoms::releaseOxygen);
-        O1.start();
-
-
+            Thread threadH = new Thread(Water::madeH);
+            threadH.start();
+            Thread threadO = new Thread(Water::madeO);
+            threadO.start();
     }
-}
 
-class Atoms{
-    public static final CyclicBarrier BARRIER = new CyclicBarrier(3, new MadeWater());
-    public static void releaseHydrogen(){
-        while(true) {
+    public static void madeH(){
+        int counter = 0;
+        while (true) {
             try {
-                BARRIER.await();
+                semaphoreH.acquire();
                 System.out.println("H");
+                counter++;
+                if(counter == 2){
+                    cyclicBarrier.await();
+                    counter = 0;
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (BrokenBarrierException e) {
                 e.printStackTrace();
             }
+            semaphoreH.release();
         }
     }
 
-    public static void releaseOxygen(){
+    public static void madeO(){
         while(true) {
             try {
-                BARRIER.await();
+                semaphoreO.acquire();
                 System.out.println("O");
+                cyclicBarrier.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (BrokenBarrierException e) {
                 e.printStackTrace();
             }
-        }
-
-    }
-
-    private static class MadeWater implements Runnable {
-        @Override
-        public void run() {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Молекула воды готова");
-
+            semaphoreO.release();
         }
     }
 }
